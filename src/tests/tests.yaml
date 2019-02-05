@@ -1,0 +1,9 @@
+charm_name: cinder-ns5
+tests:
+  - tests.tests_cinder_ns5.CinderNS5Test
+configure:
+  - zaza.charm_tests.keystone.setup.add_demo_user
+gate_bundles:
+  - xenial-ocata
+smoke_bundles:
+  - xenial-ocata
