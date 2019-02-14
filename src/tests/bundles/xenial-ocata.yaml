@@ -42,6 +42,15 @@ applications:
     series: xenial
     charm: cinder-ns5
     options:
+      driver-type: nfs
+      backend-name: special-iscsi
+      rest-address: 10.0.0.20
+      rest-port: 0
+      rest-user: super-admin
+      rest-password: password
+      host-address: 192.168.2.1
+      pool: vol1
+      iscsi-group: special-group
 # Add config options here
   rabbitmq-server:
     charm: cs:~openstack-charmers-next/rabbitmq-server

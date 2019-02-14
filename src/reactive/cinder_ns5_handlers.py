@@ -26,7 +26,8 @@ charms_openstack.charm.use_defaults(
     'storage-backend.connected',
 )
 
+
 @charms.reactive.when('config.changed.driver-source')
 def reinstall():
-    with charms_openstack.charm.provide_charm_instance() as charm:
-        charm.install()
+    with charms_openstack.charm.provide_charm_instance() as ns5charm:
+        ns5charm.install()

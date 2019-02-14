@@ -23,6 +23,7 @@ import zaza.model
 import zaza.charm_tests.test_utils as test_utils
 import zaza.utilities.openstack as openstack_utils
 
+
 class CinderNS5Test(test_utils.OpenStackBaseTest):
     """Encapsulate NS5 tests."""
 
@@ -39,8 +40,15 @@ class CinderNS5Test(test_utils.OpenStackBaseTest):
         logging.info('ns5')
         expected_contents = {
             'cinder-ns5': {
-                'iscsi_helper': ['tgtadm'],
-                'volume_dd_blocksize': ['512']}}
+                'volume_driver': [
+                    'cinder.volume.drivers.nexenta.ns5.nfs.NexentaNfsDriver'],
+                'volume_backend_name': ['special-iscsi'],
+                'nexenta_rest_address': ['10.0.0.20'],
+                'nexenta_rest_port': ['0'],
+                'nexenta_user': ['super-admin'],
+                'nexenta_password': ['password'],
+                'nas_host': ['192.168.2.1'],
+                'nas_share_path': ['vol1']}}
 
         zaza.model.run_on_leader(
             'cinder',
@@ -54,17 +62,16 @@ class CinderNS5Test(test_utils.OpenStackBaseTest):
             timeout=2)
 
     def test_create_volume(self):
-         test_vol_name = "zaza{}".format(uuid.uuid1().fields[0])
-         vol_new = self.cinder_client.volumes.create(
-             name=test_vol_name,
-             size=2)
-         openstack_utils.resource_reaches_status(
-             self.cinder_client.volumes,
-             vol_new.id,
-             expected_status='available')
-         test_vol = self.cinder_client.volumes.find(name=test_vol_name)
-         self.assertEqual(
-             getattr(test_vol, 'os-vol-host-attr:host').split('#')[0],
-             'cinder@cinder-ns5')
-         self.cinder_client.volumes.delete(vol_new)
-
+        test_vol_name = "zaza{}".format(uuid.uuid1().fields[0])
+        vol_new = self.cinder_client.volumes.create(
+            name=test_vol_name,
+            size=2)
+        openstack_utils.resource_reaches_status(
+            self.cinder_client.volumes,
+            vol_new.id,
+            expected_status='available')
+        test_vol = self.cinder_client.volumes.find(name=test_vol_name)
+        self.assertEqual(
+            getattr(test_vol, 'os-vol-host-attr:host').split('#')[0],
+            'cinder@cinder-ns5')
+        self.cinder_client.volumes.delete(vol_new)

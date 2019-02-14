@@ -39,11 +39,56 @@ class TestCinderNS5Charm(test_utils.PatchHelper):
     def test_cinder_base(self):
         charm = self._patch_config_and_charm({})
         self.assertEqual(charm.name, 'cinder_ns5')
-        self.assertEqual(charm.version_package, '')
-        self.assertEqual(charm.packages, [''])
+        self.assertEqual(charm.version_package, 'cinder-common')
+        self.assertEqual(charm.packages, ['cinder-common'])
 
-    def test_cinder_configuration(self):
-        charm = self._patch_config_and_charm({'a': 'b'})
+    def test_cinder_configuration_iscsi(self):
+        charm = self._patch_config_and_charm({
+            'driver-type': 'iscsi',
+            'backend-name': 'special-iscsi',
+            'rest-address': '10.0.0.20',
+            'rest-port': '0',
+            'rest-user': 'super-admin',
+            'rest-password': 'password',
+            'host-address': '192.168.2.1',
+            'pool': 'vol1',
+            'iscsi-group': 'special-group'})
+        config = charm.cinder_configuration()
+        self.assertEqual(
+            config,
+            [
+                ('volume_driver', ('cinder.volume.drivers.nexenta.ns5.iscsi.'
+                                   'NexentaISCSIDriver')),
+                ('volume_backend_name', 'special-iscsi'),
+                ('nexenta_rest_address', '10.0.0.20'),
+                ('nexenta_rest_port', '0'),
+                ('nexenta_user', 'super-admin'),
+                ('nexenta_password', 'password'),
+                ('nexenta_host', '192.168.2.1'),
+                ('nexenta_volume', 'vol1'),
+                ('nexenta_volume_group', 'special-group')])
+
+    def test_cinder_configuration_nfs(self):
+        charm = self._patch_config_and_charm({
+            'driver-type': 'nfs',
+            'backend-name': 'special-iscsi',
+            'rest-address': '10.0.0.20',
+            'rest-port': '0',
+            'rest-user': 'super-admin',
+            'rest-password': 'password',
+            'host-address': '192.168.2.1',
+            'pool': 'vol1',
+            'iscsi-group': 'special-group'})
         config = charm.cinder_configuration() # noqa
-        # Add check here that configuration is as expected.
-        # self.assertEqual(config, {})
+        self.assertEqual(
+            config,
+            [
+                ('volume_driver', ('cinder.volume.drivers.nexenta.ns5.nfs.'
+                                   'NexentaNfsDriver')),
+                ('volume_backend_name', 'special-iscsi'),
+                ('nexenta_rest_address', '10.0.0.20'),
+                ('nexenta_rest_port', '0'),
+                ('nexenta_user', 'super-admin'),
+                ('nexenta_password', 'password'),
+                ('nas_host', '192.168.2.1'),
+                ('nas_share_path', 'vol1')])

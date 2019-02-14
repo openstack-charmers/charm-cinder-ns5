@@ -1,24 +1,17 @@
 name: cinder-ns5
-summary: NS5 integration for OpenStack Block Storage
+summary: NexentaStor5 Cinder backend charm
 maintainer: OpenStack Charmers <openstack-charmers@lists.ubuntu.com>
 description: |
- Cinder is the block storage service for the Openstack project.
- .
- This charm provides a NS5 backend for Cinder
+  This charm enables the NexentaStor5 Cinder drivers.
 tags:
   - openstack
   - storage
-  - file-servers
-  - misc
-series:
-  - xenial
-  - bionic
-subordinate: true
-provides:
-  storage-backend:
-    interface: cinder-backend
-    scope: container
 requires:
   juju-info:
     interface: juju-info
-    scope: container
+    scope:     container
+provides:
+  storage-backend:
+    interface: cinder-backend
+    scope:    container
+subordinate: true

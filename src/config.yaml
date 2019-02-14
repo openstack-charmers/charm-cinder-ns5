@@ -1,1 +1,85 @@
 options:
+  driver-source:
+    type: string
+    default:
+    description: |
+      PPA to install driver from.
+  driver-key:
+    type: string
+    default:
+    description: |
+      Key ID to import to the apt keyring to support use with arbitary source
+      configuration from outside of Launchpad archives or PPA's.
+  driver-type:
+    type:        string
+    default:     nfs
+    description: |
+      (Optional) Driver type used for the Cinder NexentaStor5 driver.
+      .
+      Valid values are 'nfs' and 'iscsi', which lead to use that specific
+      driver.
+  backend-name:
+    type:        string
+    default:     cinder-ns5
+    description: |
+      (Optional) The Cinder backend name used from the set up NexentaStor5
+      backend.
+      .
+      If set to `null`, the charm service name will be used.
+  rest-address:
+    type:        string
+    default:
+    description: |
+      (Required) The address for the NexentaStor REST API.
+      .
+      Should be a valid IP address or DNS name.
+  rest-port:
+    type:        int
+    default:     0
+    description: |
+      (Optional) The port used for the NexentaStor REST API.
+      .
+      When using the default value (0), the default ports are used for both
+      HTTP (8080) and HTTPS (8443).
+  rest-user:
+    type:        string
+    default:     admin
+    description: |
+      (Reccomended) The username used for authentication against the NexentaStor
+      REST API.
+  rest-password:
+    type:        string
+    default:     nexenta
+    description: |
+      (Reccomended) The password used for authentication against the NexentaStor
+      REST API.
+  host-address:
+    type:        string
+    default:
+    description: |
+      (Required) The address for the NexentaStor storage host.
+      .
+      This setting is mapped to
+      - `nas_host`     for the NFS driver
+      - `nexenta_host` for the ISCSI driver
+      .
+      Should be a valid IP address or DNS name.
+  pool:
+    type:        string
+    default:
+    description: |
+      (Required) The volume pool used from NexentaStor.
+      .
+      This setting is mapped to
+      - `nas_share_path` for the NFS driver; should be a valid path to a
+        filesystem, such as in `example_pool/path/to/fs` (NOTICE! No initial
+        slash)
+      - `nexenta_volume` for the ISCSI driver; is the identifier of the pool
+        holding all the volumes
+  iscsi-group:
+    type:        string
+    default:     iscsi
+    description: |
+      (Optional) The volume group for NexentaStor5.
+      .
+      Used only when using the ISCSI driver.
