@@ -1,5 +1,9 @@
+import subprocess
+import tempfile
+
 import charms_openstack.charm
 import charmhelpers.core.hookenv as ch_hookenv # noqa 
+import charmhelpers.contrib.openstack.utils as ch_os_utils
 
 charms_openstack.charm.use_defaults('charm.default-select-release')
 
@@ -41,6 +45,25 @@ class CinderNS5Charm(
 
         return driver_options
 
+    @property
+    def cinder_volume_dir(self):
+        return '/usr/lib/python2.7/dist-packages/cinder/volume/drivers'
+
+    # XXX THIS IS A TEMPORARY WORKAROUND AND SHOULD NOT BE INCLUDED IN
+    # ANY DEPLOYMENTS OTHER THAN POCs
+    def install(self):
+        super(CinderNS5Charm, self).install()
+        os_release = ch_os_utils.get_os_codename_package('cinder-common')
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            git_dir = '{}/nexenta-cinder'.format(tmpdirname)
+            subprocess.check_output([
+                'git', 'clone', '-b', 'stable/{}'.format(os_release),
+                'https://github.com/Nexenta/cinder', git_dir])
+            subprocess.check_output([
+                'cp', '-rf',
+                '{}/cinder/volume/drivers/nexenta'.format(git_dir),
+                self.cinder_volume_dir])
+
 
 class CinderNS5CharmRocky(CinderNS5Charm):
 
@@ -48,3 +71,7 @@ class CinderNS5CharmRocky(CinderNS5Charm):
     release = 'rocky'
     version_package = 'cinder-common'
     packages = [version_package]
+
+    @property
+    def cinder_volume_dir(self):
+        return '/usr/lib/python3.6/dist-packages/cinder/volume/drivers'
