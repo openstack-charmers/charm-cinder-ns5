@@ -17,7 +17,7 @@ class CinderNS5Charm(
 
     name = 'cinder_ns5'
     version_package = 'cinder-common'
-    release = 'ocata'
+    release = 'queens'
     packages = [version_package]
     stateless = True
     # Specify any config that the user *must* set.
@@ -49,11 +49,10 @@ class CinderNS5Charm(
     def cinder_volume_dir(self):
         return '/usr/lib/python2.7/dist-packages/cinder/volume/drivers'
 
-    # XXX THIS IS A TEMPORARY WORKAROUND AND SHOULD NOT BE INCLUDED IN
-    # ANY DEPLOYMENTS OTHER THAN POCs
-    def install(self):
-        super(CinderNS5Charm, self).install()
+    def apply_poc_driver_overwrite(self):
         os_release = ch_os_utils.get_os_codename_package('cinder-common')
+        ch_hookenv.log(
+            "Cloning and overwriting with stable/{}".format(os_release))
         with tempfile.TemporaryDirectory() as tmpdirname:
             git_dir = '{}/nexenta-cinder'.format(tmpdirname)
             subprocess.check_output([
@@ -63,6 +62,17 @@ class CinderNS5Charm(
                 'cp', '-rf',
                 '{}/cinder/volume/drivers/nexenta'.format(git_dir),
                 self.cinder_volume_dir])
+
+    # XXX THIS IS A TEMPORARY WORKAROUND AND SHOULD NOT BE INCLUDED IN
+    # ANY DEPLOYMENTS OTHER THAN POCs
+    def install(self):
+        super(CinderNS5Charm, self).install()
+        if self.config.get('poc-enable-driver-copy', False):
+            ch_hookenv.log(
+                "Overwriting nexenta driver. THIS IS FOR PoC DEPLOYS ONLY")
+            self.apply_poc_driver_overwrite()
+        else:
+            ch_hookenv.log("Skipping driver overwrite")
 
 
 class CinderNS5CharmRocky(CinderNS5Charm):

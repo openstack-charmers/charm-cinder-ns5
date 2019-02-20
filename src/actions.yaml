@@ -1,0 +1,4 @@
+poc-reinstall:
+  description: |
+    Run reinstall trigger. Only to be used in POC env
+

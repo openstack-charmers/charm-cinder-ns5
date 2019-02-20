@@ -1,4 +1,11 @@
 options:
+  poc-enable-driver-copy:
+    type: boolean
+    default: False
+    description: |
+      This option overwrites the nexenta cinder driver with a copy from a
+      nexenta git branch. This is fragile and WILL break your deployment.
+      This option is present for PoC ONLY.
   driver-source:
     type: string
     default:

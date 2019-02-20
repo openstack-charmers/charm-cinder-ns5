@@ -1,0 +1,127 @@
+series: bionic
+relations:
+- - nova-compute:amqp
+  - rabbitmq-server:amqp
+- - neutron-gateway:amqp
+  - rabbitmq-server:amqp
+- - neutron-gateway:amqp-nova
+  - rabbitmq-server:amqp
+- - keystone:shared-db
+  - mysql:shared-db
+- - cinder:identity-service
+  - keystone:identity-service
+- - nova-cloud-controller:identity-service
+  - keystone:identity-service
+- - glance:identity-service
+  - keystone:identity-service
+- - neutron-api:identity-service
+  - keystone:identity-service
+- - neutron-openvswitch:neutron-plugin-api
+  - neutron-api:neutron-plugin-api
+- - cinder:shared-db
+  - mysql:shared-db
+- - neutron-api:shared-db
+  - mysql:shared-db
+- - cinder:amqp
+  - rabbitmq-server:amqp
+- - neutron-api:amqp
+  - rabbitmq-server:amqp
+- - neutron-gateway:neutron-plugin-api
+  - neutron-api:neutron-plugin-api
+- - glance:shared-db
+  - mysql:shared-db
+- - glance:amqp
+  - rabbitmq-server:amqp
+- - nova-cloud-controller:image-service
+  - glance:image-service
+- - nova-compute:image-service
+  - glance:image-service
+- - nova-cloud-controller:amqp
+  - rabbitmq-server:amqp
+- - nova-cloud-controller:quantum-network-service
+  - neutron-gateway:quantum-network-service
+- - nova-compute:neutron-plugin
+  - neutron-openvswitch:neutron-plugin
+- - neutron-openvswitch:amqp
+  - rabbitmq-server:amqp
+- - nova-cloud-controller:shared-db
+  - mysql:shared-db
+- - nova-cloud-controller:neutron-api
+  - neutron-api:neutron-api
+- - nova-cloud-controller:cloud-compute
+  - nova-compute:cloud-compute
+- - cinder:storage-backend
+  - cinder-ns5:storage-backend
+applications:
+  glance:
+    charm: cs:~openstack-charmers-next/glance
+    num_units: 1
+    options:
+      worker-multiplier: 0.25
+  cinder:
+    charm: cs:~gnuoy/cinder-13
+    num_units: 1
+    options:
+      block-device: "None"
+      glance-api-version: 2
+  keystone:
+    charm: cs:~openstack-charmers-next/keystone
+    num_units: 1
+    options:
+      admin-password: openstack
+      worker-multiplier: 0.25
+  mysql:
+    charm: cs:~openstack-charmers-next/percona-cluster
+    num_units: 1
+    options:
+      innodb-buffer-pool-size: 256M
+      max-connections: 1000
+  neutron-api:
+    charm: cs:~openstack-charmers-next/neutron-api
+    num_units: 1
+    options:
+      flat-network-providers: physnet1
+      neutron-security-groups: true
+      worker-multiplier: 0.25
+  neutron-gateway:
+    charm: cs:~openstack-charmers-next/neutron-gateway
+    num_units: 1
+    options:
+      bridge-mappings: physnet1:br-ex
+      worker-multiplier: 0.25
+  neutron-openvswitch:
+    charm: cs:~openstack-charmers-next/neutron-openvswitch
+    num_units: 0
+  nova-cloud-controller:
+    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    num_units: 1
+    options:
+      network-manager: Neutron
+      worker-multiplier: 0.25
+      debug: true
+  nova-compute:
+    charm: cs:~gnuoy/nova-compute-16
+    num_units: 2
+    constraints: mem=4G
+    options:
+      config-flags: default_ephemeral_format=ext4
+      enable-live-migration: true
+      enable-resize: true
+      migration-auth-type: ssh
+      debug: true
+      cpu-model: kvm64
+      cpu-mode: custom
+  rabbitmq-server:
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    num_units: 1
+  cinder-ns5:
+    charm: cinder-ns5
+    series: bionic
+    options:
+      driver-type: nfs
+      rest-address: 10.5.0.41
+      rest-user: admin
+      rest-password: Nexenta@1
+      host-address: 10.5.0.41
+      pool: tank/data
+      poc-enable-driver-copy: True
