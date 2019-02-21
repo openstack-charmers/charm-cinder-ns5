@@ -65,7 +65,7 @@ class CinderNS5Test(test_utils.OpenStackBaseTest):
         test_vol_name = "zaza{}".format(uuid.uuid1().fields[0])
         vol_new = self.cinder_client.volumes.create(
             name=test_vol_name,
-            size=2)
+            size=1)
         openstack_utils.resource_reaches_status(
             self.cinder_client.volumes,
             vol_new.id,

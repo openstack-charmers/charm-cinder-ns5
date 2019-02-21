@@ -36,7 +36,8 @@ class CinderNS5Charm(
         if driver_type == 'nfs':
             driver_options.extend([
                 ('nas_host', self.config.get('host-address')),
-                ('nas_share_path', self.config.get('pool'))])
+                ('nas_share_path', self.config.get('pool')),
+                ('nas_mount_options', 'vers=4')])
         elif driver_type == 'iscsi':
             driver_options.extend([
                 ('nexenta_host', self.config.get('host-address')),
