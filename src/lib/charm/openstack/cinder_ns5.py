@@ -1,3 +1,4 @@
+import os
 import subprocess
 import tempfile
 
@@ -50,16 +51,31 @@ class CinderNS5Charm(
     def cinder_volume_dir(self):
         return '/usr/lib/python2.7/dist-packages/cinder/volume/drivers'
 
+    def set_git_proxy(self):
+        http_proxy = os.environ.get('JUJU_CHARM_HTTP_PROXY')
+        http_proxy = http_proxy or os.environ.get('JUJU_CHARM_HTTPS_PROXY')
+        # Specify git file explicitly as $HOME is not always set which causes
+        # git config to fail with a 128 exit code.
+        cmd = ['git', 'config', '--file', '/home/ubuntu/.gitconfig']
+        if http_proxy:
+            ch_hookenv.log("Setting git http.proxy to {}".format(http_proxy))
+            cmd.extend(['http.proxy', http_proxy])
+        else:
+            ch_hookenv.log("Unsetting git http.proxy")
+            cmd.extend(['--unset', 'http.proxy'])
+        subprocess.check_call(cmd)
+
     def apply_poc_driver_overwrite(self):
+        self.set_git_proxy()
         os_release = ch_os_utils.get_os_codename_package('cinder-common')
         ch_hookenv.log(
             "Cloning and overwriting with stable/{}".format(os_release))
         with tempfile.TemporaryDirectory() as tmpdirname:
             git_dir = '{}/nexenta-cinder'.format(tmpdirname)
-            subprocess.check_output([
+            subprocess.check_call([
                 'git', 'clone', '-b', 'stable/{}'.format(os_release),
                 'https://github.com/Nexenta/cinder', git_dir])
-            subprocess.check_output([
+            subprocess.check_call([
                 'cp', '-rf',
                 '{}/cinder/volume/drivers/nexenta'.format(git_dir),
                 self.cinder_volume_dir])
