@@ -60,10 +60,12 @@ class CinderNS5Charm(
         if http_proxy:
             ch_hookenv.log("Setting git http.proxy to {}".format(http_proxy))
             cmd.extend(['http.proxy', http_proxy])
+            subprocess.check_call(cmd)
         else:
             ch_hookenv.log("Unsetting git http.proxy")
             cmd.extend(['--unset', 'http.proxy'])
-        subprocess.check_call(cmd)
+            # git config returns non-zero return codes if the value is not set
+            subprocess.call(cmd)
 
     def apply_poc_driver_overwrite(self):
         self.set_git_proxy()
